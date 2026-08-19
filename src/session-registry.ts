@@ -1,13 +1,7 @@
 import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import {
-	createAgentSession,
-	DefaultResourceLoader,
-	type PackageSource,
-	SessionManager,
-	SettingsManager,
-} from "@earendil-works/pi-coding-agent";
+import { createAgentSession, SessionManager } from "@earendil-works/pi-coding-agent";
 
 export interface BridgeSession {
 	readonly sessionFile: string | undefined;
@@ -64,23 +58,8 @@ export class BridgeSessionRegistry {
 
 	private async open(threadId: string, cwd: string): Promise<BridgeSession> {
 		const stored = (await this.load())[threadId];
-		const sessionCwd = stored?.cwd ?? cwd;
-		const agentDir = process.env["PI_CODING_AGENT_DIR"] ?? join(homedir(), ".pi", "agent");
-		const settingsManager = SettingsManager.create(sessionCwd, agentDir);
-		const resourceLoader = new DefaultResourceLoader({
-			cwd: sessionCwd,
-			agentDir,
-			settingsManager: bridgeResourceSettings(settingsManager),
-		});
-		await resourceLoader.reload();
 		const sessionManager = stored ? SessionManager.open(stored.sessionFile) : SessionManager.create(cwd);
-		const { session } = await createAgentSession({
-			cwd: sessionCwd,
-			agentDir,
-			resourceLoader,
-			sessionManager,
-			settingsManager,
-		});
+		const { session } = await createAgentSession({ cwd: stored?.cwd ?? cwd, sessionManager });
 		if (!stored && session.sessionFile) {
 			this.stored![threadId] = { cwd, sessionFile: session.sessionFile };
 			await this.save();
@@ -110,20 +89,6 @@ export class BridgeSessionRegistry {
 		this.saveChain = this.saveChain.then(write, write);
 		await this.saveChain;
 	}
-}
-
-export function bridgeResourceSettings(source: SettingsManager): SettingsManager {
-	return SettingsManager.fromStorage({
-		withLock(scope: "global" | "project", read: (current: string | undefined) => string | undefined): void {
-			const settings = scope === "global" ? source.getGlobalSettings() : source.getProjectSettings();
-			read(JSON.stringify({ ...settings, packages: settings.packages?.filter(isBridgeCompatiblePackage) }));
-		},
-	}, { projectTrusted: source.isProjectTrusted() });
-}
-
-function isBridgeCompatiblePackage(value: PackageSource): boolean {
-	const source = typeof value === "string" ? value : value.source;
-	return !source.startsWith("npm:@howaboua/pi-codex-conversion");
 }
 
 async function findSessionFile(sessionId: string): Promise<string | undefined> {
