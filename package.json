@@ -1,0 +1,29 @@
+{
+  "name": "pi-codex-mobile-bridge",
+  "version": "0.1.0",
+  "description": "Expose Pi sessions to the Codex mobile app",
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:scriptogre/pi-codex-mobile-bridge",
+  "bin": {
+    "pi-codex-mobile-bridge": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "check": "bun run typecheck && bun test",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "0.84.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}
