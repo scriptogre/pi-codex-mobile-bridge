@@ -30,7 +30,7 @@ test("mobile bridge streams Pi text as an OpenAI Responses result", async () => 
 		const { port } = server.address() as AddressInfo;
 		const modelsResponse = await fetch(`http://127.0.0.1:${port}/v1/models?client_version=0.146.0`);
 		const models = await modelsResponse.json() as { models: Array<{ slug: string }> };
-		assert.equal(models.models[0]?.slug, "pi");
+		assert.equal(models.models[0]?.slug, "gpt-5.6-sol");
 		const response = await fetch(`http://127.0.0.1:${port}/v1/responses`, {
 			method: "POST",
 			headers: { "content-type": "application/json" },

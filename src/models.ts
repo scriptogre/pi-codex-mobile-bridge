@@ -1,7 +1,7 @@
 export const PI_BRIDGE_MODELS = {
 	models: [{
-		slug: "pi",
-		display_name: "Pi",
+		slug: "gpt-5.6-sol",
+		display_name: "GPT-5.6-Sol",
 		description: "Pi coding agent through Codex Mobile",
 		base_instructions: "Forward the user's request to the Pi coding agent.",
 		default_reasoning_level: "medium",
